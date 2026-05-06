@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SiCATA — Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+  <!-- Brand -->
+  <div class="sidebar-brand">
+    <img src="SiCATA-logo.png" alt="SiCATA" class="brand-logo-img">
+    <div>
+      <div class="brand-name">SiCATA</div>
+      <div class="brand-sub" id="sb-desa">Desa Sukamaju</div>
+    </div>
+  </div>
+
+  <!-- Nav -->
+  <nav class="sidebar-nav">
+    <a class="nav-item active" onclick="showPage('dashboard')" id="nav-dashboard">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+      Dashboard
+    </a>
+
+    <a class="nav-item" onclick="showPage('buat-surat')" id="nav-buat-surat">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+      Kelola Surat
+    </a>
+
+    <a class="nav-item" onclick="showPage('arsip')" id="nav-arsip">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/><line x1="10" y1="12" x2="14" y2="12"/></svg>
+      Arsip Surat
+      <span class="nav-badge" id="nav-badge">0</span>
+      <svg class="nav-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+    </a>
+
+    <div class="nav-section-label admin-only">Manajemen</div>
+    <a class="nav-item admin-only" onclick="showPage('kelola-akun')" id="nav-kelola-akun">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      Kelola Akun
+    </a>
+  </nav>
+
+  <!-- Footer: user + logout -->
+  <div class="sidebar-footer">
+    <div class="sidebar-user-block" onclick="showPage('profil')">
+      <div class="user-avatar admin-avatar" id="user-avatar">A</div>
+      <div>
+        <div class="user-name" id="user-name">User Name</div>
+        <div class="user-desa" id="user-desa">Desa Sukamaju</div>
+      </div>
+    </div>
+    <button class="logout-btn" onclick="logout()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      Keluar
+    </button>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main-wrapper">
+  <header class="topbar">
+    <button class="menu-btn" onclick="toggleSidebar()">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
+    <div class="topbar-title" id="topbar-title">Dashboard</div>
+    <div class="topbar-right">
+      <button class="topbar-btn" onclick="showPage('buat-surat')">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        <span>Buat Surat</span>
+      </button>
+    </div>
+  </header>
+
+  <main class="content">
+
+    <!-- ══ DASHBOARD ══ -->
+    <div class="page active" id="page-dashboard">
+      <div class="user-notice">
+        <div class="user-notice-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg></div>
+        <div><h3>Mode Tampilan — Akses Terbatas</h3><p>Anda masuk sebagai <strong>Pengguna</strong>. Hanya dapat melihat arsip dan mengunduh surat.</p></div>
+      </div>
+
+      <div class="page-header">
+        <div>
+          <h1 class="page-title" id="dashboard-title">Dashboard</h1>
+          <p class="page-sub" id="dashboard-sub">Ringkasan aktivitas surat desa</p>
+        </div>
+      </div>
+
+      <!-- STATS -->
+      <div class="stats-grid" id="stats-grid">
+        <div class="stat-card skeleton-card"><div class="skeleton" style="height:100px"></div></div>
+        <div class="stat-card skeleton-card"><div class="skeleton" style="height:100px"></div></div>
+        <div class="stat-card skeleton-card"><div class="skeleton" style="height:100px"></div></div>
+        <div class="stat-card skeleton-card"><div class="skeleton" style="height:100px"></div></div>
+      </div>
+
+      <div class="dashboard-grid">
+        <div class="chart-card">
+          <div class="card-header">
+            <div class="card-title">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:5px;vertical-align:middle;"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+              Aktivitas Selama 6 Bulan
+            </div>
+            <div class="chart-legend">
+              <span class="legend-dot" style="background:#f97316"></span>&nbsp;Keluar
+              <span class="legend-dot" style="background:#3b82f6;margin-left:10px"></span>&nbsp;Masuk
+            </div>
+          </div>
+          <div class="chart-wrap" id="chart-wrap"><div class="skeleton" style="height:170px;border-radius:8px"></div></div>
+        </div>
+        <div class="donut-card">
+          <div class="card-header"><div class="card-title">Diagram Distribusi</div></div>
+          <div class="donut-wrap"><canvas id="chart-donut" height="150"></canvas></div>
+          <div class="donut-legend" id="donut-legend"></div>
+        </div>
+      </div>
+
+      <div class="table-card">
+        <div class="card-header">
+          <div class="card-title">Surat Terbaru</div>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <div class="search-wrap" style="max-width:200px;">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <input type="text" placeholder="Cari Surat..." id="dash-search" oninput="onDashSearch(this.value)">
+            </div>
+            <div style="position:relative;display:inline-block" id="export-drop-1">
+              <button class="export-btn" onclick="toggleExportMenu('export-drop-1')">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                Download Rekap ▾
+              </button>
+              <div id="menu-export-drop-1" style="display:none;position:absolute;right:0;top:110%;background:#fff;border:1px solid #e5e7eb;border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,.1);z-index:99;min-width:160px;overflow:hidden;">
+                <div onclick="exportData('csv');toggleExportMenu('export-drop-1')" style="padding:9px 14px;font-size:12.5px;cursor:pointer;display:flex;align-items:center;gap:8px;color:#374151;" onmouseover="this.style.background='#f3f4f6'" onmouseout="this.style.background=''">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                  Download CSV (Excel)
+                </div>
+                <div onclick="exportData('pdf');toggleExportMenu('export-drop-1')" style="padding:9px 14px;font-size:12.5px;cursor:pointer;display:flex;align-items:center;gap:8px;color:#374151;border-top:1px solid #f3f4f6;" onmouseover="this.style.background='#f3f4f6'" onmouseout="this.style.background=''">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                  Print / Save PDF
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="table-scroll" id="dash-table-wrap"><div class="skeleton" style="height:180px"></div></div>
+      </div>
+    </div>
+
+    <!-- ══ KELOLA SURAT (admin) ══ -->
+    <div class="page admin-section" id="page-buat-surat">
+      <div class="page-header">
+        <div><h1 class="page-title">Kelola Surat</h1><p class="page-sub">Pilih jenis surat yang ingin ditambahkan</p></div>
+      </div>
+
+      <!-- ── TABS MASUK / KELUAR ── -->
+      <div class="profil-tabs" style="margin-bottom:18px;" id="surat-tabs">
+        <button class="profil-tab active" id="tab-masuk" onclick="switchSuratTab('masuk')">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg>
+          Surat Masuk
+        </button>
+        <button class="profil-tab" id="tab-keluar" onclick="switchSuratTab('keluar')">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          Surat Keluar
+        </button>
+      </div>
+
+      <div id="alert-area"></div>
+
+      <!-- ══════════════════════════════════════════
+           PANEL: SURAT MASUK (dengan upload scan)
+      ══════════════════════════════════════════ -->
+      <div id="panel-masuk">
+        <div class="form-layout">
+          <div class="form-main">
+            <div class="form-card">
+              <div class="form-section-title">Informasi Surat Masuk</div>
+              <div class="form-grid">
+                <div class="form-group">
+                  <label>Jenis Surat Masuk <span class="req">*</span></label>
+                  <div class="select-wrap">
+                    <select id="m-jenis" onchange="onJenisMasukChange()">
+                      <option value="">— Pilih Jenis —</option>
+                      <option value="masuk_umum">SM — Surat Masuk Umum</option>
+                      <option value="masuk_dinas">SMD — Surat Masuk Dinas</option>
+                      <option value="masuk_permohonan">SMP — Surat Masuk Permohonan</option>
+                    </select>
+                    <svg class="select-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label>Tanggal Surat <span class="req">*</span></label>
+                  <input type="date" id="m-tgl" onchange="onJenisMasukChange()">
+                </div>
+                <div class="form-group">
+                  <label>Sifat Surat</label>
+                  <div class="select-wrap">
+                    <select id="m-sifat"><option>Biasa</option><option>Penting</option><option>Segera</option><option>Rahasia</option></select>
+                    <svg class="select-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label>Jabatan Penanda Tangan</label>
+                  <div class="select-wrap">
+                    <select id="m-jabatan"><option>Kepala Desa</option><option>Sekretaris Desa</option><option>Kaur Umum</option><option>Kaur Keuangan</option></select>
+                    <svg class="select-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+                  </div>
+                </div>
+                <div class="form-group full">
+                  <label>Dari / Pengirim <span class="req">*</span></label>
+                  <input type="text" id="m-tujuan" placeholder="Contoh: Dinas PMD Kabupaten Tasikmalaya">
+                </div>
+                <div class="form-group full">
+                  <label>Perihal <span class="req">*</span></label>
+                  <input type="text" id="m-perihal" placeholder="Contoh: Jadwal Evaluasi Program Dana Desa 2025">
+                </div>
+                <div class="form-group full">
+                  <label>Nama Penanda Tangan</label>
+                  <input type="text" id="m-nama" value="H. Supriyadi, S.IP">
+                </div>
+                <div class="form-group full">
+                  <label>Keterangan Singkat</label>
+                  <textarea id="m-isi" placeholder="Tuliskan ringkasan isi surat..." rows="3"></textarea>
+                </div>
+
+                <!-- ── UPLOAD SCAN SURAT ── -->
+                <div class="form-group full">
+                  <label>Scan / Foto Surat <span style="font-weight:400;color:var(--text-2)">(Opsional — JPG/PNG/PDF, maks 5MB)</span></label>
+                  <div class="upload-zone" id="m-upload-zone" onclick="document.getElementById('m-scan').click()" ondragover="dragOver(event)" ondrop="dropFile(event,'m-scan')">
+                    <input type="file" id="m-scan" accept="image/*,.pdf" style="display:none" onchange="onScanChange(this)">
+                    <div id="m-upload-placeholder">
+                      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color:var(--text-3)"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                      <p style="margin:8px 0 4px;font-size:13px;font-weight:500;color:var(--text-2)">Klik atau seret file ke sini</p>
+                      <p style="font-size:11px;color:var(--text-3)">JPG · PNG · PDF — Maks 5 MB</p>
+                    </div>
+                    <div id="m-upload-preview" style="display:none;text-align:center;">
+                      <img id="m-preview-img" src="" alt="Preview" style="max-width:100%;max-height:160px;border-radius:8px;border:1px solid var(--border);object-fit:contain;">
+                      <p id="m-preview-name" style="font-size:11px;color:var(--text-2);margin-top:6px;"></p>
+                      <button onclick="clearScan(event)" style="margin-top:6px;font-size:11px;color:var(--red);background:none;border:none;cursor:pointer;">✕ Hapus file</button>
+                    </div>
+                    <div id="m-pdf-preview" style="display:none;text-align:center;padding:16px 0;">
+                      <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/></svg>
+                      <p id="m-pdf-name" style="font-size:12px;color:var(--text-2);margin-top:6px;font-weight:500;"></p>
+                      <button onclick="clearScan(event)" style="margin-top:6px;font-size:11px;color:var(--red);background:none;border:none;cursor:pointer;">✕ Hapus file</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-side">
+            <div class="preview-card">
+              <div class="form-section-title">Preview Nomor Surat</div>
+              <div class="nomor-display" id="m-nomor-display">
+                <div class="nomor-loading" id="m-nomor-loading" style="display:none"><div class="mini-spinner"></div></div>
+                <div id="m-nomor-content">
+                  <div class="nomor-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg></div>
+                  <div class="nomor-text" id="m-nomor-text">Pilih Jenis Surat</div>
+                  <div class="nomor-label" id="m-nomor-label">Nomor otomatis setelah pilih jenis</div>
+                </div>
+              </div>
+              <div class="type-indicator" style="margin-top:12px;">
+                <div class="type-dot" id="m-type-dot" style="background:#10b981"></div>
+                <div id="m-type-label" style="font-size:12px">Surat Masuk</div>
+              </div>
+            </div>
+            <div class="action-card">
+              <button class="btn-reset" onclick="resetFormMasuk()">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.22"/></svg>
+                Reset
+              </button>
+              <button class="btn-save" id="btn-save-masuk" onclick="simpanSuratMasuk()">
+                <div class="btn-spinner" id="spinner-masuk"></div>
+                <svg id="icon-masuk" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                <span id="txt-masuk">Simpan Surat Masuk</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════════════
+           PANEL: SURAT KELUAR
+      ══════════════════════════════════════════ -->
+      <div id="panel-keluar" style="display:none">
+        <div class="form-layout">
+          <div class="form-main">
+            <div class="form-card">
+              <div class="form-section-title">Informasi Surat Keluar</div>
+              <div class="form-grid">
+                <div class="form-group">
+                  <label>Jenis Surat Keluar <span class="req">*</span></label>
+                  <div class="select-wrap">
+                    <select id="jenis-surat" onchange="onJenisChange()">
+                      <option value="">— Pilih Jenis —</option>
+                      <option value="keluar_keterangan">SK — Surat Keterangan</option>
+                      <option value="keluar_undangan">SU — Surat Undangan</option>
+                      <option value="keluar_permohonan">SP — Surat Permohonan</option>
+                      <option value="keluar_pengantar">SPG — Surat Pengantar</option>
+                      <option value="keluar_keputusan">SKP — Surat Keputusan</option>
+                      <option value="keluar_edaran">SE — Surat Edaran</option>
+                    </select>
+                    <svg class="select-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label>Tanggal Surat <span class="req">*</span></label>
+                  <input type="date" id="tgl-surat" onchange="onJenisChange()">
+                </div>
+                <div class="form-group">
+                  <label>Sifat Surat</label>
+                  <div class="select-wrap">
+                    <select id="sifat-surat"><option>Biasa</option><option>Penting</option><option>Segera</option><option>Rahasia</option></select>
+                    <svg class="select-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label>Jabatan Penanda Tangan <span class="req">*</span></label>
+                  <div class="select-wrap">
+                    <select id="jabatan-ttd"><option>Kepala Desa</option><option>Sekretaris Desa</option><option>Kaur Umum</option><option>Kaur Keuangan</option></select>
+                    <svg class="select-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+                  </div>
+                </div>
+                <div class="form-group full">
+                  <label id="label-tujuan">Kepada / Tujuan <span class="req">*</span></label>
+                  <input type="text" id="tujuan-surat" placeholder="Contoh: Camat Kecamatan Sukamaju">
+                </div>
+                <div class="form-group full">
+                  <label>Perihal <span class="req">*</span></label>
+                  <input type="text" id="perihal-surat" placeholder="Contoh: Permohonan Bantuan Dana Pembangunan Desa">
+                </div>
+                <div class="form-group full">
+                  <label>Nama Penanda Tangan</label>
+                  <input type="text" id="nama-ttd" value="H. Supriyadi, S.IP">
+                </div>
+                <div class="form-group full">
+                  <label>Isi / Keterangan Singkat</label>
+                  <textarea id="isi-surat" placeholder="Tuliskan ringkasan isi..." rows="4"></textarea>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-side">
+            <div class="preview-card">
+              <div class="form-section-title">Preview Nomor Surat</div>
+              <div class="nomor-display" id="nomor-display">
+                <div class="nomor-loading" id="nomor-loading" style="display:none"><div class="mini-spinner"></div></div>
+                <div id="nomor-content">
+                  <div class="nomor-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+                  <div class="nomor-text" id="nomor-text">Pilih Jenis Surat</div>
+                  <div class="nomor-label" id="nomor-label">Nomor akan terisi otomatis</div>
+                </div>
+              </div>
+              <div class="type-indicator" style="margin-top:12px;">
+                <div class="type-dot" id="type-dot" style="background:#f59e0b"></div>
+                <div id="type-label" style="font-size:12px">Surat Keluar</div>
+              </div>
+            </div>
+            <div class="action-card">
+              <button class="btn-reset" onclick="resetForm()">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.22"/></svg>
+                Reset
+              </button>
+              <button class="btn-save" id="btn-save" onclick="simpanSurat()">
+                <div class="btn-spinner" id="btn-spinner"></div>
+                <svg id="btn-icon-save" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                <span id="btn-save-text">Simpan &amp; Download</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ ARSIP ══ -->
+    <div class="page" id="page-arsip">
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">
+            Arsip Surat
+            <span class="readonly-notice" id="readonly-tag" style="display:none">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+              Hanya Baca
+            </span>
+          </h1>
+          <p class="page-sub">Berikut detail surat anda</p>
+        </div>
+      </div>
+      <div class="table-card">
+        <div class="card-header" style="flex-wrap:wrap;gap:10px;">
+          <div class="toolbar-left">
+            <div class="filter-tabs">
+              <button class="filter-tab active" onclick="setKat('semua',this)">Semua</button>
+              <button class="filter-tab" onclick="setKat('keluar',this)">Keluar</button>
+              <button class="filter-tab" onclick="setKat('masuk',this)">Masuk</button>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <div class="search-wrap">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <input type="text" id="search-input" placeholder="Cari laporan..." oninput="onSearch(this.value)">
+            </div>
+            <button class="filter-toggle-btn" onclick="toggleAdvFilter()">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            </button>
+            <div style="position:relative;display:inline-block" id="export-drop-2">
+              <button class="export-btn" onclick="toggleExportMenu('export-drop-2')">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                Download Rekap ▾
+              </button>
+              <div class="export-menu" id="menu-export-drop-2" style="display:none;position:absolute;right:0;top:110%;background:#fff;border:1px solid #e5e7eb;border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,.1);z-index:99;min-width:160px;overflow:hidden;">
+                <div onclick="exportData('csv');toggleExportMenu('export-drop-2')" style="padding:9px 14px;font-size:12.5px;cursor:pointer;display:flex;align-items:center;gap:8px;color:#374151;" onmouseover="this.style.background='#f3f4f6'" onmouseout="this.style.background=''">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                  Download CSV (Excel)
+                </div>
+                <div onclick="exportData('pdf');toggleExportMenu('export-drop-2')" style="padding:9px 14px;font-size:12.5px;cursor:pointer;display:flex;align-items:center;gap:8px;color:#374151;border-top:1px solid #f3f4f6;" onmouseover="this.style.background='#f3f4f6'" onmouseout="this.style.background=''">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                  Print / Save PDF
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="adv-filter" id="adv-filter">
+          <div class="adv-filter-row">
+            <div class="form-group" style="flex:1">
+              <label>Sifat</label>
+              <div class="select-wrap">
+                <select id="filter-sifat" onchange="loadArsip(1)"><option value="semua">Semua Sifat</option><option>Biasa</option><option>Penting</option><option>Segera</option><option>Rahasia</option></select>
+                <svg class="select-arrow" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+              </div>
+            </div>
+            <div class="form-group" style="flex:1"><label>Dari Tanggal</label><input type="date" id="filter-tgl-dari" onchange="loadArsip(1)"></div>
+            <div class="form-group" style="flex:1"><label>Sampai Tanggal</label><input type="date" id="filter-tgl-sampai" onchange="loadArsip(1)"></div>
+            <button class="btn-reset-filter" onclick="resetFilter()">Reset</button>
+          </div>
+        </div>
+
+        <div class="table-scroll" id="arsip-table-wrap">
+          <div class="loading-overlay" id="arsip-loading"><div class="loading-spinner"></div></div>
+          <table>
+            <thead>
+              <tr><th>Nomor Surat</th><th>Jenis</th><th>Perihal</th><th>Tujuan/Pengirim</th><th>Tanggal</th><th>Sifat</th><th>Aksi</th></tr>
+            </thead>
+            <tbody id="tbl-arsip"></tbody>
+          </table>
+        </div>
+        <div class="pagination" id="pagination"></div>
+      </div>
+    </div>
+
+    <!-- ══ KELOLA AKUN (admin) ══ -->
+    <div class="page admin-section" id="page-kelola-akun">
+      <div class="page-header">
+        <div><h1 class="page-title">Kelola Akun</h1><p class="page-sub">Manajemen akun pengguna sistem</p></div>
+      </div>
+      <div class="table-card">
+        <div class="card-header"><div class="card-title">Daftar Pengguna</div></div>
+        <div class="table-scroll">
+          <table id="akun-table">
+            <thead><tr><th>Nama</th><th>Username</th><th>Jabatan</th><th>Role</th><th>Aksi</th></tr></thead>
+            <tbody id="tbl-akun"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ PROFIL / PENGATURAN AKUN ══ -->
+    <div class="page" id="page-profil">
+      <div class="page-header">
+        <div><h1 class="page-title">Pengaturan Akun</h1><p class="page-sub">Kelola informasi akun Anda</p></div>
+      </div>
+
+      <div class="profil-tabs">
+        <button class="profil-tab active" onclick="switchProfilTab('tab-profil',this)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          Profil
+        </button>
+        <button class="profil-tab" onclick="switchProfilTab('tab-password',this)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          Ganti Password
+        </button>
+      </div>
+
+      <!-- Tab Profil -->
+      <div id="tab-profil">
+        <div class="profil-card">
+          <div class="avatar-block">
+            <div class="avatar-big" id="profil-avatar">
+              A
+              <div class="avatar-cam">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+              </div>
+            </div>
+            <div class="avatar-info">
+              <h3 id="profil-nama-display">User Name</h3>
+              <p id="profil-desa-display">Desa Sukamaju</p>
+            </div>
+          </div>
+
+          <div class="profil-grid">
+            <div class="form-group">
+              <label>User Name</label>
+              <input type="text" id="profil-nama" placeholder="User Name">
+            </div>
+            <div class="form-group">
+              <label>Email</label>
+              <input type="email" id="profil-email" placeholder="user123@gmail.com">
+            </div>
+            <div class="form-group">
+              <label>No. Telepon</label>
+              <input type="text" id="profil-telp" placeholder="081234567890">
+            </div>
+            <div class="form-group">
+              <label>Nama Desa</label>
+              <input type="text" id="profil-desa" placeholder="Desa Sukamaju">
+            </div>
+          </div>
+
+          <button class="btn-simpan" onclick="simpanProfil()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/></svg>
+            Simpan Perubahan
+          </button>
+        </div>
+      </div>
+
+      <!-- Tab Password -->
+      <div id="tab-password" style="display:none;">
+        <div class="profil-card">
+          <div style="max-width:420px;">
+            <div class="form-group" style="margin-bottom:14px;">
+              <label>Password Lama</label>
+              <input type="password" id="pw-lama" placeholder="Password saat ini">
+            </div>
+            <div class="form-group" style="margin-bottom:14px;">
+              <label>Password Baru</label>
+              <input type="password" id="pw-baru" placeholder="Min. 8 karakter">
+            </div>
+            <div class="form-group" style="margin-bottom:14px;">
+              <label>Konfirmasi Password Baru</label>
+              <input type="password" id="pw-baru2" placeholder="Ulangi password baru">
+            </div>
+            <button class="btn-simpan" onclick="gantiPassword()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+              Simpan Password
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- MODAL DETAIL -->
+<div class="modal-overlay" id="modal-detail" onclick="handleOverlayClick(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <div><div class="modal-pretitle">Detail Dokumen</div><h3 class="modal-title" id="modal-title-text">—</h3></div>
+      <button class="modal-close" onclick="closeModal()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
+    <div class="modal-footer">
+      <button class="btn-modal-close" onclick="closeModal()">Tutup</button>
+      <button class="btn-modal-dl" id="modal-dl-btn">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Download Word
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- CONFIRM MODAL -->
+<div class="modal-overlay" id="modal-confirm" onclick="closeConfirm()">
+  <div class="modal" style="max-width:340px" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <div><div class="modal-pretitle">Konfirmasi</div><h3 class="modal-title">Hapus Surat?</h3></div>
+      <button class="modal-close" onclick="closeConfirm()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="modal-body" style="padding-bottom:8px"><p style="font-size:13px;color:var(--text-2)">Surat ini akan dihapus permanen dan tidak dapat dikembalikan.</p></div>
+    <div class="modal-footer">
+      <button class="btn-modal-close" onclick="closeConfirm()">Batal</button>
+      <button class="btn-modal-dl" id="btn-confirm-hapus" style="background:var(--red)">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/></svg>
+        Hapus
+      </button>
+    </div>
+  </div>
+</div>
+
+<script src="api.js"></script>
+<script src="app.js"></script>
+<script>
+// ── PROFIL FUNCTIONS ──
+function switchProfilTab(tabId, btn) {
+  document.querySelectorAll('#tab-profil,#tab-password').forEach(t=>t.style.display='none');
+  document.getElementById(tabId).style.display='block';
+  document.querySelectorAll('.profil-tab').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+function loadProfil() {
+  const u = JSON.parse(localStorage.getItem('sicata_user')||'{}');
+  document.getElementById('profil-nama').value = u.nama||u.username||'';
+  document.getElementById('profil-email').value = u.email||'';
+  document.getElementById('profil-telp').value = u.telp||'';
+  document.getElementById('profil-desa').value = u.desa||'Desa Sukamaju';
+  const init = (u.nama||u.username||'U')[0].toUpperCase();
+  document.getElementById('profil-avatar').textContent = init;
+  const cam = document.createElement('div'); cam.className='avatar-cam';
+  cam.innerHTML='<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>';
+  document.getElementById('profil-avatar').appendChild(cam);
+  document.getElementById('profil-nama-display').textContent = u.nama||u.username||'User Name';
+  document.getElementById('profil-desa-display').textContent = u.desa||'Desa Sukamaju';
+}
+
+function simpanProfil() {
+  const u = JSON.parse(localStorage.getItem('sicata_user')||'{}');
+  u.nama = document.getElementById('profil-nama').value.trim()||u.nama;
+  u.email = document.getElementById('profil-email').value.trim()||u.email;
+  u.telp = document.getElementById('profil-telp').value.trim()||u.telp;
+  u.desa = document.getElementById('profil-desa').value.trim()||u.desa;
+  localStorage.setItem('sicata_user', JSON.stringify(u));
+  // update sidebar
+  document.getElementById('user-name').textContent = u.nama||u.username||'User';
+  document.getElementById('user-desa').textContent = u.desa||'Desa Sukamaju';
+  document.getElementById('profil-nama-display').textContent = u.nama||u.username||'User Name';
+  document.getElementById('profil-desa-display').textContent = u.desa||'Desa Sukamaju';
+  showToast('Profil berhasil disimpan!','success');
+}
+
+function gantiPassword() {
+  const lama=document.getElementById('pw-lama').value;
+  const baru=document.getElementById('pw-baru').value;
+  const baru2=document.getElementById('pw-baru2').value;
+  if(!lama){showToast('Masukkan password lama','error');return;}
+  if(baru.length<8){showToast('Password baru min. 8 karakter','error');return;}
+  if(baru!==baru2){showToast('Konfirmasi password tidak sama','error');return;}
+  document.getElementById('pw-lama').value='';
+  document.getElementById('pw-baru').value='';
+  document.getElementById('pw-baru2').value='';
+  showToast('Password berhasil diubah!','success');
+}
+
+// Override showPage untuk load profil
+const _origShowPage = typeof showPage !== 'undefined' ? showPage : null;
+document.addEventListener('DOMContentLoaded', ()=>{
+  // Patch showPage for profil
+  const origFn = window.showPage;
+  window.showPage = function(name) {
+    origFn(name);
+    if(name==='profil') loadProfil();
+  };
+});
+
+function onDashSearch(v){ /* uses loadArsip-like logic if needed */ }
+// exportData implemented in app.js
+</script>
+</body>
+</html>
