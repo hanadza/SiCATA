@@ -18,7 +18,7 @@
  * ╚══════════════════════════════════════════════════════════╝
  */
 
-const API_BASE = 'observant-warmth.railway.internal'; // Ganti → 'http://127.0.0.1:8000' setelah backend berjalan
+const API_BASE = 'https://sicata-production.up.railway.app'; // Ganti → 'http://127.0.0.1:8000' setelah backend berjalan
 
 // ─── AUTH HELPERS ────────────────────────────────────────────
 function getToken()  { return localStorage.getItem('sicata_token'); }
