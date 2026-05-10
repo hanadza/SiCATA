@@ -3,7 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="SiCATA — Login ke Sistem Catatan & Arsip Tata Administrasi Desa.">
 <title>SiCATA — Login</title>
+<link rel="icon" type="image/png" href="SiCATA-logo.png">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
 <script src="desa_tasikmalaya.js"></script>
 <style>
@@ -295,7 +297,7 @@ async function doLogin() {
   try {
     const res  = await fetch(`${API_BASE}/api/login`, {
       method : 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
       body   : JSON.stringify({ email: u, password: p })
     });
     const data = await res.json();
@@ -348,7 +350,7 @@ async function doDaftar() {
   try {
     const res  = await fetch(`${API_BASE}/api/register`, {
       method : 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
       body   : JSON.stringify({
         name                 : nama,
         email,

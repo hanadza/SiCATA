@@ -264,34 +264,46 @@ function rowHTML(s, mode) {
 }
 
 // ─── KELOLA AKUN (admin only) ─────────────────────────────────
-function loadAkunTable() {
-  const defaultAccounts = [
-    { id:1, username:'admin', nama:'Admin Desa', jabatan:'Kepala Desa', role:'admin' },
-    { id:2, username:'user',  nama:'Operator Desa', jabatan:'Staf Administrasi', role:'user' },
-  ];
-  const registered = JSON.parse(localStorage.getItem('sicata_accounts') || '[]');
-  const all = [...defaultAccounts, ...registered];
-
+async function loadAkunTable() {
   const tbody = document.getElementById('tbl-akun');
   if (!tbody) return;
-  tbody.innerHTML = all.map(a=>`
-    <tr>
-      <td style="font-weight:600">${xe(a.nama)}</td>
-      <td class="nomor-cell">${xe(a.username)}</td>
-      <td style="color:var(--text-2)">${xe(a.jabatan||'—')}</td>
-      <td><span class="role-badge ${a.role}">${a.role==='admin'?'Admin':'User'}</span></td>
-      <td><div class="action-row">
-        ${a.id > 2 ? `<button class="btn-icon danger" onclick="hapusAkun(${a.id})" title="Hapus"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/></svg></button>` : '<span style="font-size:11px;color:var(--text-3)">Sistem</span>'}
-      </div></td>
-    </tr>
-  `).join('');
+
+  tbody.innerHTML = `<tr><td colspan="5"><div style="display:flex;justify-content:center;padding:30px"><div class="loading-spinner"></div></div></td></tr>`;
+
+  try {
+    const res = await API.getUsers();
+    const users = res.data || [];
+
+    if (!users.length) {
+      tbody.innerHTML = `<tr><td colspan="5"><div class="empty-state"><p>Belum ada pengguna</p></div></td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = users.map(a => `
+      <tr>
+        <td style="font-weight:600">${xe(a.nama)}</td>
+        <td class="nomor-cell">${xe(a.email)}</td>
+        <td style="color:var(--text-2)">${xe(a.jabatan||'—')}</td>
+        <td><span class="role-badge ${a.role}">${a.role==='admin'?'Admin':'User'}</span></td>
+        <td><div class="action-row">
+          ${a.role !== 'admin' ? `<button class="btn-icon danger" onclick="hapusAkun(${a.id})" title="Hapus"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/></svg></button>` : '<span style="font-size:11px;color:var(--text-3)">Sistem</span>'}
+        </div></td>
+      </tr>
+    `).join('');
+  } catch(e) {
+    tbody.innerHTML = `<tr><td colspan="5"><div class="empty-state"><p style="color:var(--red)">Gagal memuat data: ${e.message}</p></div></td></tr>`;
+  }
 }
 
-function hapusAkun(id) {
-  const accounts = JSON.parse(localStorage.getItem('sicata_accounts') || '[]');
-  localStorage.setItem('sicata_accounts', JSON.stringify(accounts.filter(a => a.id !== id)));
-  loadAkunTable();
-  showToast('Akun berhasil dihapus', 'success');
+async function hapusAkun(id) {
+  if (!confirm('Yakin ingin menghapus akun ini?')) return;
+  try {
+    await API.deleteUser(id);
+    showToast('✅ Akun berhasil dihapus', 'success');
+    loadAkunTable();
+  } catch(e) {
+    showToast('❌ ' + e.message, 'error');
+  }
 }
 
 // ─── TABS: SURAT MASUK / KELUAR ──────────────────────────────

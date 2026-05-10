@@ -3,8 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="SiCATA — Sistem Catatan & Arsip Tata Administrasi Desa. Kelola surat masuk dan keluar desa secara digital.">
 <title>SiCATA — Dashboard</title>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+<link rel="icon" type="image/png" href="SiCATA-logo.png">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <link rel="stylesheet" href="styles.css">
 </head>
@@ -469,7 +471,7 @@
         <div class="card-header"><div class="card-title">Daftar Pengguna</div></div>
         <div class="table-scroll">
           <table id="akun-table">
-            <thead><tr><th>Nama</th><th>Username</th><th>Jabatan</th><th>Role</th><th>Aksi</th></tr></thead>
+            <thead><tr><th>Nama</th><th>Email</th><th>Jabatan</th><th>Role</th><th>Aksi</th></tr></thead>
             <tbody id="tbl-akun"></tbody>
           </table>
         </div>
@@ -625,32 +627,50 @@ function loadProfil() {
   document.getElementById('profil-desa-display').textContent = u.desa||'Desa Sukamaju';
 }
 
-function simpanProfil() {
-  const u = JSON.parse(localStorage.getItem('sicata_user')||'{}');
-  u.nama = document.getElementById('profil-nama').value.trim()||u.nama;
-  u.email = document.getElementById('profil-email').value.trim()||u.email;
-  u.telp = document.getElementById('profil-telp').value.trim()||u.telp;
-  u.desa = document.getElementById('profil-desa').value.trim()||u.desa;
-  localStorage.setItem('sicata_user', JSON.stringify(u));
-  // update sidebar
-  document.getElementById('user-name').textContent = u.nama||u.username||'User';
-  document.getElementById('user-desa').textContent = u.desa||'Desa Sukamaju';
-  document.getElementById('profil-nama-display').textContent = u.nama||u.username||'User Name';
-  document.getElementById('profil-desa-display').textContent = u.desa||'Desa Sukamaju';
-  showToast('Profil berhasil disimpan!','success');
+async function simpanProfil() {
+  const nama  = document.getElementById('profil-nama').value.trim();
+  const email = document.getElementById('profil-email').value.trim();
+  const telp  = document.getElementById('profil-telp').value.trim();
+  const desa  = document.getElementById('profil-desa').value.trim();
+
+  if (!nama) { showToast('Nama tidak boleh kosong', 'error'); return; }
+
+  try {
+    const result = await API.updateProfile({ name: nama, email, telp, desa });
+    // Update localStorage with server response
+    const u = result.user || JSON.parse(localStorage.getItem('sicata_user')||'{}');
+    localStorage.setItem('sicata_user', JSON.stringify(u));
+    // update sidebar & displays
+    document.getElementById('user-name').textContent = u.nama||u.name||'User';
+    document.getElementById('user-desa').textContent = u.desa||'Desa';
+    document.getElementById('sb-desa').textContent   = u.desa||'Desa';
+    document.getElementById('profil-nama-display').textContent = u.nama||u.name||'User Name';
+    document.getElementById('profil-desa-display').textContent = u.desa||'Desa';
+    const init = (u.nama||u.name||'U')[0].toUpperCase();
+    document.getElementById('user-avatar').textContent = init;
+    showToast('✅ Profil berhasil disimpan!','success');
+  } catch(e) {
+    showToast('❌ ' + e.message, 'error');
+  }
 }
 
-function gantiPassword() {
+async function gantiPassword() {
   const lama=document.getElementById('pw-lama').value;
   const baru=document.getElementById('pw-baru').value;
   const baru2=document.getElementById('pw-baru2').value;
   if(!lama){showToast('Masukkan password lama','error');return;}
   if(baru.length<8){showToast('Password baru min. 8 karakter','error');return;}
   if(baru!==baru2){showToast('Konfirmasi password tidak sama','error');return;}
-  document.getElementById('pw-lama').value='';
-  document.getElementById('pw-baru').value='';
-  document.getElementById('pw-baru2').value='';
-  showToast('Password berhasil diubah!','success');
+
+  try {
+    await API.changePassword(lama, baru, baru2);
+    document.getElementById('pw-lama').value='';
+    document.getElementById('pw-baru').value='';
+    document.getElementById('pw-baru2').value='';
+    showToast('✅ Password berhasil diubah!','success');
+  } catch(e) {
+    showToast('❌ ' + e.message, 'error');
+  }
 }
 
 // Override showPage untuk load profil
@@ -664,7 +684,16 @@ document.addEventListener('DOMContentLoaded', ()=>{
   };
 });
 
-function onDashSearch(v){ /* uses loadArsip-like logic if needed */ }
+let _dashSearchTimer = null;
+function onDashSearch(v) {
+  clearTimeout(_dashSearchTimer);
+  _dashSearchTimer = setTimeout(async () => {
+    try {
+      const res = await API.getSurat({ page: 1, limit: 8, search: v });
+      renderDashboardTable(res.data || []);
+    } catch(e) {}
+  }, 350);
+}
 // exportData implemented in app.js
 </script>
 </body>

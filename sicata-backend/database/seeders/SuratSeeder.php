@@ -22,6 +22,7 @@ class SuratSeeder extends Seeder
                 'jabatan' => 'Kepala Desa',
                 'nama'    => 'H. Supriyadi, S.IP',
                 'isi'     => '',
+                'desa'    => 'Desa Sukamaju',
             ],
             [
                 'jenis'   => 'keluar_undangan',
@@ -32,6 +33,7 @@ class SuratSeeder extends Seeder
                 'jabatan' => 'Kepala Desa',
                 'nama'    => 'H. Supriyadi, S.IP',
                 'isi'     => '',
+                'desa'    => 'Desa Sukamaju',
             ],
             [
                 'jenis'   => 'masuk_dinas',
@@ -42,6 +44,7 @@ class SuratSeeder extends Seeder
                 'jabatan' => 'Kepala Desa',
                 'nama'    => 'H. Supriyadi, S.IP',
                 'isi'     => '',
+                'desa'    => 'Desa Sukamaju',
             ],
             [
                 'jenis'   => 'keluar_edaran',
@@ -52,6 +55,7 @@ class SuratSeeder extends Seeder
                 'jabatan' => 'Kepala Desa',
                 'nama'    => 'H. Supriyadi, S.IP',
                 'isi'     => '',
+                'desa'    => 'Desa Sukamaju',
             ],
             [
                 'jenis'   => 'masuk_umum',
@@ -62,6 +66,7 @@ class SuratSeeder extends Seeder
                 'jabatan' => 'Kepala Desa',
                 'nama'    => 'H. Supriyadi, S.IP',
                 'isi'     => '',
+                'desa'    => 'Desa Sukamaju',
             ],
         ];
 

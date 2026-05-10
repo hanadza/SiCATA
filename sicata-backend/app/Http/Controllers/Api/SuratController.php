@@ -156,7 +156,8 @@ class SuratController extends Controller
             return response()->json(['nomor' => null]);
         }
         try {
-            $preview = $this->suratService->previewNomor($jenis, $tgl);
+            $desa    = $request->user()->desa;
+            $preview = $this->suratService->previewNomor($jenis, $tgl, $desa);
             return response()->json($preview);
         } catch (\InvalidArgumentException $e) {
             return response()->json(['message' => $e->getMessage()], 422);

@@ -13,9 +13,15 @@ Route::get('/check-desa',[AuthController::class, 'checkDesa']);
 // ── PROTECTED ROUTES (wajib Sanctum token) ────────────────────
 Route::middleware('auth:sanctum')->group(function () {
 
-    // Auth
-    Route::post('/logout', [AuthController::class, 'logout']);
-    Route::get('/me',      [AuthController::class, 'me']);
+    // Auth & Profile
+    Route::post('/logout',          [AuthController::class, 'logout']);
+    Route::get('/me',               [AuthController::class, 'me']);
+    Route::post('/change-password', [AuthController::class, 'changePassword']);
+    Route::put('/profile',          [AuthController::class, 'updateProfile']);
+
+    // User Management (admin only)
+    Route::get('/users',            [AuthController::class, 'listUsers']);
+    Route::delete('/users/{id}',    [AuthController::class, 'deleteUser']);
 
     // Surat — endpoint terpisah masuk & keluar
     Route::get('/surat',              [SuratController::class, 'index']);

@@ -28,6 +28,7 @@ function isLoggedIn(){ return !!getToken(); }
 function authHeaders() {
   return {
     'Content-Type': 'application/json',
+    'Accept': 'application/json',
     'Authorization': `Bearer ${getToken()}`
   };
 }
@@ -40,7 +41,15 @@ function requireAuth() {
   return true;
 }
 
-function logout() {
+async function logout() {
+  try {
+    if (API_BASE && getToken()) {
+      await fetch(`${API_BASE}/api/logout`, {
+        method: 'POST',
+        headers: authHeaders()
+      });
+    }
+  } catch(e) { /* ignore — clearing local state regardless */ }
   localStorage.removeItem('sicata_token');
   localStorage.removeItem('sicata_user');
   window.location.href = 'login.html';
@@ -256,7 +265,7 @@ const API = {
     }
     const res = await fetch(`${API_BASE}/api/login`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
       body: JSON.stringify({ email, password })
     });
     const data = await res.json();
@@ -283,7 +292,7 @@ const API = {
     }
     const res  = await fetch(`${API_BASE}/api/register`, {
       method : 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
       body   : JSON.stringify(payload)
     });
     const data = await res.json();
@@ -316,7 +325,7 @@ const API = {
     if (API_BASE) {
       const res = await fetch(`${API_BASE}/api/surat/masuk`, {
         method : 'POST',
-        headers: { 'Authorization': `Bearer ${getToken()}` },
+        headers: { 'Authorization': `Bearer ${getToken()}`, 'Accept': 'application/json' },
         // Jangan set Content-Type — biarkan browser set multipart/form-data boundary otomatis
         body   : formData
       });
@@ -360,5 +369,95 @@ const API = {
    */
   async createSuratKeluar(payload) {
     return this.createSurat({ ...payload });
+  },
+
+  /**
+   * POST /api/change-password
+   * Ganti password — kirim current_password, password, password_confirmation
+   */
+  async changePassword(currentPassword, newPassword, confirmPassword) {
+    if (!API_BASE) {
+      await mockDelay(300);
+      return { message: 'Password berhasil diubah.' };
+    }
+    const res = await fetch(`${API_BASE}/api/change-password`, {
+      method: 'POST',
+      headers: authHeaders(),
+      body: JSON.stringify({
+        current_password:      currentPassword,
+        password:              newPassword,
+        password_confirmation: confirmPassword,
+      })
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      if (data.errors) throw new Error(Object.values(data.errors).flat().join(' '));
+      throw new Error(data.message || 'Gagal mengganti password');
+    }
+    return data;
+  },
+
+  /**
+   * PUT /api/profile
+   * Update profil user
+   */
+  async updateProfile(payload) {
+    if (!API_BASE) {
+      await mockDelay(300);
+      const u = getUser() || {};
+      Object.assign(u, payload);
+      localStorage.setItem('sicata_user', JSON.stringify(u));
+      return { message: 'Profil berhasil diperbarui.', user: u };
+    }
+    const res = await fetch(`${API_BASE}/api/profile`, {
+      method: 'PUT',
+      headers: authHeaders(),
+      body: JSON.stringify(payload)
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      if (data.errors) throw new Error(Object.values(data.errors).flat().join(' '));
+      throw new Error(data.message || 'Gagal memperbarui profil');
+    }
+    // Sinkronkan localStorage dengan data terbaru dari server
+    if (data.user) localStorage.setItem('sicata_user', JSON.stringify(data.user));
+    return data;
+  },
+
+  /**
+   * GET /api/users
+   * Daftar user (admin only)
+   */
+  async getUsers() {
+    if (!API_BASE) {
+      await mockDelay(200);
+      return { data: [
+        { id:1, nama:'Admin Desa', email:'admin@desa.id', role:'admin', desa:'Desa Sukamaju', jabatan:'Kepala Desa' },
+        { id:2, nama:'Staff Desa', email:'staff@desa.id', role:'user',  desa:'Desa Sukamakmur', jabatan:'Staf Administrasi' },
+      ]};
+    }
+    const res = await fetch(`${API_BASE}/api/users`, { headers: authHeaders() });
+    if (res.status === 401) { logout(); return; }
+    if (res.status === 403) throw new Error('Akses ditolak');
+    return res.json();
+  },
+
+  /**
+   * DELETE /api/users/:id
+   * Hapus user (admin only)
+   */
+  async deleteUser(id) {
+    if (!API_BASE) {
+      await mockDelay(200);
+      return { message: 'Akun berhasil dihapus.' };
+    }
+    const res = await fetch(`${API_BASE}/api/users/${id}`, {
+      method: 'DELETE',
+      headers: authHeaders()
+    });
+    if (res.status === 401) { logout(); return; }
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || 'Gagal menghapus akun');
+    return data;
   },
 };

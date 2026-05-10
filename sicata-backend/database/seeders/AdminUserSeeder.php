@@ -31,7 +31,7 @@ class AdminUserSeeder extends Seeder
                 'password' => Hash::make('password'),
                 'role'     => 'user',
                 'telp'     => '081234567891',
-                'desa'     => 'Desa Sukamaju',
+                'desa'     => 'Desa Sukamakmur',
                 'jabatan'  => 'Staf Administrasi',
             ]
         );
