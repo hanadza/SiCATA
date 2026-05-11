@@ -47,7 +47,7 @@ Route::get('/auth/google/callback', function () {
             'name'     => $gUser->getName(),
             'email'    => $gUser->getEmail(),
             'password' => Hash::make(Str::random(32)),
-            'desa'     => '',   // User Google harus isi desa di profil
+            'desa'     => 'Belum_Diatur_' . time(),   // User Google harus isi desa di profil
             'jabatan'  => 'Kepala Desa',
             'role'     => 'user',
             'google_id' => $gUser->getId(),
