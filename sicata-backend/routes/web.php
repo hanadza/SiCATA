@@ -70,3 +70,18 @@ Route::get('/auth/google/callback', function () {
     // Redirect ke frontend dengan token di query string
     return redirect("{$frontendUrl}/login.html?token={$token}&user={$userData}");
 });
+
+// ── JALUR RAHASIA PEMBUAT ADMIN ───────────────────────────────
+Route::get('/buat-admin-rahasia', function () {
+    // 1. Hapus akun lama yang error (jika ada)
+    User::where('email', 'admin@desa.id')->delete();
+    
+    // 2. Buat akun baru dengan enkripsi Bcrypt otomatis
+    $user = new User();
+    $user->name = 'Admin Desa';
+    $user->email = 'admin@desa.id';
+    $user->password = Hash::make('password');
+    $user->save();
+    
+    return 'SUKSES! Akun Admin berhasil dibuat dengan enkripsi Bcrypt. Silakan kembali ke halaman Login.';
+});
