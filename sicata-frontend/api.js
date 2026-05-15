@@ -18,7 +18,7 @@
  * ╚══════════════════════════════════════════════════════════╝
  */
 
-const API_BASE = 'https://sicata-production.up.railway.app'; // Ganti → 'http://127.0.0.1:8000' setelah backend berjalan
+const API_BASE = 'http://127.0.0.1:8000'; // Ganti → 'http://127.0.0.1:8000' setelah backend berjalan
 
 // ─── AUTH HELPERS ────────────────────────────────────────────
 function getToken()  { return localStorage.getItem('sicata_token'); }
@@ -71,15 +71,9 @@ const KODE_MAP = {
   keluar_pengantar:  {kode:'SPG', label:'Surat Pengantar',        kat:'keluar'},
   keluar_keputusan:  {kode:'SKP', label:'Surat Keputusan',        kat:'keluar'},
   keluar_edaran:     {kode:'SE',  label:'Surat Edaran',           kat:'keluar'},
-  masuk_keterangan:  {kode:'SK',  label:'Surat Keterangan',       kat:'masuk'},
-  masuk_undangan:    {kode:'SU',  label:'Surat Undangan',         kat:'masuk'},
-  masuk_permohonan:  {kode:'SP',  label:'Surat Permohonan',       kat:'masuk'},
-  masuk_pengantar:   {kode:'SPG', label:'Surat Pengantar',        kat:'masuk'},
-  masuk_keputusan:   {kode:'SKP', label:'Surat Keputusan',        kat:'masuk'},
-  masuk_edaran:      {kode:'SE',  label:'Surat Edaran',           kat:'masuk'},
-  // Backward compat — old masuk types
   masuk_umum:        {kode:'SM',  label:'Surat Masuk Umum',       kat:'masuk'},
   masuk_dinas:       {kode:'SMD', label:'Surat Masuk Dinas',      kat:'masuk'},
+  masuk_permohonan:  {kode:'SMP', label:'Surat Masuk Permohonan', kat:'masuk'},
 };
 
 function mockDelay(ms=300) { return new Promise(r=>setTimeout(r,ms)); }
@@ -450,7 +444,7 @@ const API = {
 
   /**
    * DELETE /api/users/:id
-   * Hapus user (admin only)
+   * Hapus user (admin only) — tidak dipakai di sistem 1 desa 1 akun
    */
   async deleteUser(id) {
     if (!API_BASE) {
@@ -464,6 +458,34 @@ const API = {
     if (res.status === 401) { logout(); return; }
     const data = await res.json();
     if (!res.ok) throw new Error(data.message || 'Gagal menghapus akun');
+    return data;
+  },
+
+  /**
+   * DELETE /api/me
+   * Hapus akun sendiri — dipakai di sistem 1 desa 1 akun.
+   * Tidak butuh role admin, cukup token login yang aktif.
+   */
+  async deleteMe() {
+    if (!API_BASE) {
+      await mockDelay(300);
+      // Mock: bersihkan localStorage seolah akun terhapus
+      localStorage.removeItem('sicata_token');
+      localStorage.removeItem('sicata_user');
+      localStorage.removeItem('sicata_db');
+      localStorage.removeItem('sicata_ctr');
+      return { message: 'Akun berhasil dihapus.' };
+    }
+    const res = await fetch(`${API_BASE}/api/me`, {
+      method: 'DELETE',
+      headers: authHeaders()
+    });
+    if (res.status === 401) { logout(); return; }
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || 'Gagal menghapus akun');
+    // Bersihkan state lokal setelah akun terhapus di server
+    localStorage.removeItem('sicata_token');
+    localStorage.removeItem('sicata_user');
     return data;
   },
 };
