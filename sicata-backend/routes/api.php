@@ -18,8 +18,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/me',               [AuthController::class, 'me']);
     Route::post('/change-password', [AuthController::class, 'changePassword']);
     Route::put('/profile',          [AuthController::class, 'updateProfile']);
+    Route::delete('/me',            [AuthController::class, 'deleteMe']);   // ← hapus akun sendiri
 
-    // User Management (admin only)
+    // User Management (admin only) — tidak dipakai di sistem 1 desa 1 akun
     Route::get('/users',            [AuthController::class, 'listUsers']);
     Route::delete('/users/{id}',    [AuthController::class, 'deleteUser']);
 
