@@ -240,9 +240,7 @@ function rowHTML(s, mode) {
     : `<span class="badge-type badge-masuk">↘ Masuk</span>`;
   const sifatClass = {Penting:'badge-penting',Segera:'badge-segera',Rahasia:'badge-rahasia'}[s.sifat]||'';
   const sifatCol = mode==='arsip' ? `<td><span class="badge-sifat ${sifatClass}">${s.sifat}</span></td>` : '';
-  const deleteBtn = isAdmin
-    ? `<button class="btn-icon danger admin-action" onclick="confirmHapus(${s.id})" title="Hapus"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg></button>`
-    : '';
+  const deleteBtn = `<button class="btn-icon danger" onclick="confirmHapus(${s.id})" title="Hapus"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg></button>`;
 
   return `<tr>
     <td class="nomor-cell">${xe(s.nomor)}</td>
@@ -387,11 +385,12 @@ function clearScan(e) {
 
 // ─── SIMPAN SURAT MASUK ───────────────────────────────────────
 async function simpanSuratMasuk() {
+  const nomor   = document.getElementById('m-nomor').value.trim();
   const jenis   = document.getElementById('m-jenis').value;
   const tgl     = document.getElementById('m-tgl').value;
   const tujuan  = document.getElementById('m-tujuan').value.trim();
   const perihal = document.getElementById('m-perihal').value.trim();
-  if (!jenis || !tgl || !tujuan || !perihal) {
+  if (!nomor || !jenis || !tgl || !tujuan || !perihal) {
     showAlert('Lengkapi semua field wajib!', 'error'); return;
   }
 
@@ -403,6 +402,7 @@ async function simpanSuratMasuk() {
 
   try {
     const fd = new FormData();
+    fd.append('nomor',   nomor);
     fd.append('jenis',   jenis);
     fd.append('tgl',     tgl);
     fd.append('tujuan',  tujuan);
@@ -426,7 +426,7 @@ async function simpanSuratMasuk() {
 }
 
 function resetFormMasuk() {
-  ['m-jenis','m-tujuan','m-perihal','m-isi'].forEach(id => { const el = document.getElementById(id); if(el) el.value=''; });
+  ['m-nomor','m-jenis','m-tujuan','m-perihal','m-isi'].forEach(id => { const el = document.getElementById(id); if(el) el.value=''; });
   document.getElementById('m-sifat').value   = 'Biasa';
   document.getElementById('m-jabatan').value = 'Kepala Desa';
   document.getElementById('m-tgl').value     = new Date().toISOString().slice(0,10);
