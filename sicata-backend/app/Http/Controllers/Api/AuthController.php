@@ -172,6 +172,20 @@ class AuthController extends Controller
     }
 
     /**
+     * DELETE /api/me
+     * Hapus akun sendiri — setiap desa boleh hapus akunnya sendiri.
+     * Tidak butuh role admin karena sistem 1 desa = 1 akun.
+     */
+    public function deleteMe(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        $user->tokens()->delete();  // cabut semua token aktif dulu
+        $user->delete();
+
+        return response()->json(['message' => 'Akun berhasil dihapus.']);
+    }
+
+    /**
      * GET /api/users
      * Daftar semua user (admin only).
      */
