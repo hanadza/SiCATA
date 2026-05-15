@@ -385,13 +385,18 @@ function clearScan(e) {
 
 // ─── SIMPAN SURAT MASUK ───────────────────────────────────────
 async function simpanSuratMasuk() {
-  const nomor   = document.getElementById('m-nomor').value.trim();
   const jenis   = document.getElementById('m-jenis').value;
   const tgl     = document.getElementById('m-tgl').value;
   const tujuan  = document.getElementById('m-tujuan').value.trim();
   const perihal = document.getElementById('m-perihal').value.trim();
-  if (!nomor || !jenis || !tgl || !tujuan || !perihal) {
+  const nomorManualEl = document.getElementById('m-nomor-manual');
+  const nomorManual   = nomorManualEl ? nomorManualEl.value.trim() : '';
+
+  if (!jenis || !tgl || !tujuan || !perihal) {
     showAlert('Lengkapi semua field wajib!', 'error'); return;
+  }
+  if (!nomorManual) {
+    showAlert('Nomor surat wajib diisi!', 'error'); return;
   }
 
   const btn = document.getElementById('btn-save-masuk');
@@ -402,7 +407,6 @@ async function simpanSuratMasuk() {
 
   try {
     const fd = new FormData();
-    fd.append('nomor',   nomor);
     fd.append('jenis',   jenis);
     fd.append('tgl',     tgl);
     fd.append('tujuan',  tujuan);
@@ -411,6 +415,7 @@ async function simpanSuratMasuk() {
     fd.append('sifat',   document.getElementById('m-sifat').value);
     fd.append('jabatan', document.getElementById('m-jabatan').value);
     fd.append('nama',    document.getElementById('m-nama').value.trim());
+    fd.append('nomor',   nomorManual);
     const scanFile = document.getElementById('m-scan').files[0];
     if (scanFile) fd.append('scan_surat', scanFile);
 
@@ -426,12 +431,13 @@ async function simpanSuratMasuk() {
 }
 
 function resetFormMasuk() {
-  ['m-nomor','m-jenis','m-tujuan','m-perihal','m-isi'].forEach(id => { const el = document.getElementById(id); if(el) el.value=''; });
-  document.getElementById('m-sifat').value   = 'Biasa';
-  document.getElementById('m-jabatan').value = 'Kepala Desa';
-  document.getElementById('m-tgl').value     = new Date().toISOString().slice(0,10);
-  document.getElementById('m-nomor-text').textContent  = 'Pilih Jenis Surat';
-  document.getElementById('m-nomor-label').textContent = 'Nomor otomatis setelah pilih jenis';
+  ['m-jenis','m-tujuan','m-perihal','m-isi','m-jabatan','m-nama'].forEach(id => {
+    const el = document.getElementById(id); if(el) el.value='';
+  });
+  const nomorEl = document.getElementById('m-nomor-manual');
+  if (nomorEl) nomorEl.value = '';
+  document.getElementById('m-sifat').value = 'Biasa';
+  document.getElementById('m-tgl').value   = new Date().toISOString().slice(0,10);
   clearScan({ stopPropagation: ()=>{} });
 }
 
@@ -603,6 +609,12 @@ async function downloadWord(id) {
 async function downloadWordData(s) {
   if (typeof JSZip === 'undefined') { showToast('JSZip belum dimuat','error'); return; }
 
+  // Ambil data user dari localStorage
+  const _u         = JSON.parse(localStorage.getItem('sicata_user') || '{}');
+  const namaDesa   = (_u.desa   || s.desa   || 'Desa').trim();
+  const namaKec    = (_u.kecamatan || '').trim();
+  const namaKab    = (_u.kabupaten || 'Kota Tasikmalaya').trim();
+
   const tglPanjang = new Date(s.tgl).toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric'});
   const isKeluar   = s.kat==='keluar';
 
@@ -646,12 +658,12 @@ async function downloadWordData(s) {
   let body = '';
 
   // ── KOP SURAT ──
-  body += P('PEMERINTAH KABUPATEN SUKAJAYA', {bold:true, size:26, align:'center', space:60});
-  body += P('KECAMATAN SUKAMAJU',            {bold:true, size:24, align:'center', space:60});
-  body += P('KANTOR KEPALA DESA SUKAMAJU',   {bold:true, size:28, align:'center', space:60});
-  body += P('Jl. Raya Sukamaju No. 01, Kecamatan Sukamaju, Kabupaten Sukajaya 12345',
+  body += P('PEMERINTAH ' + namaKab.toUpperCase(),                           {bold:true, size:26, align:'center', space:60});
+  body += P((namaKec ? 'KECAMATAN ' + namaKec.toUpperCase() : ''),           {bold:true, size:24, align:'center', space:namaKec ? 60 : 0});
+  body += P('KANTOR KEPALA DESA ' + namaDesa.toUpperCase(),                  {bold:true, size:28, align:'center', space:60});
+  body += P('Jl. Raya ' + namaDesa + (namaKec ? ', Kec. ' + namaKec : '') + ', ' + namaKab,
              {size:20, align:'center', color:'555555', space:60});
-  body += P('Telp. (021) 1234567  |  Email: desasukamaju@sukajaya.go.id',
+  body += P('Email: desa.' + namaDesa.toLowerCase().replace(/\s+/g,'.') + '@' + namaKab.toLowerCase().replace(/\s+/g,'') + '.go.id',
              {size:20, align:'center', color:'555555', space:80});
 
   // Garis pemisah kop
@@ -672,7 +684,7 @@ async function downloadWordData(s) {
     body += P('Yang bertanda tangan di bawah ini:', {size:24, space:120});
     body += EP(80);
     body += Row('Nama',    s.nama,    true);
-    body += Row('Jabatan', `${s.jabatan} Desa Sukamaju`);
+    body += Row('Jabatan', `${s.jabatan} Desa ${namaDesa}`);
     body += EP(120);
     body += P('Dengan ini menerangkan / memberitahukan bahwa:', {size:24, space:120});
     body += EP(80);
@@ -699,7 +711,7 @@ async function downloadWordData(s) {
   body += EP(80);
 
   // ── TANDA TANGAN ──
-  body += P(`Sukamaju, ${tglPanjang}`, {align:'right', size:24, space:60});
+  body += P(namaDesa + ', ' + tglPanjang, {align:'right', size:24, space:60});
   body += P(s.jabatan,                {align:'right', bold:true, size:24, space:240});
   body += EP(80);
   body += EP(80);
@@ -895,9 +907,21 @@ async function exportData(format) {
   try {
     showToast('Menyiapkan rekap...', 'info');
 
-    // Ambil semua surat (limit besar)
-    const result = await API.getSurat({ limit: 9999, page: 1 });
-    const surats = result.data || result;
+    // Ambil semua surat — coba API dulu, fallback ke mock DB langsung
+    let surats = [];
+    try {
+      const result = await API.getSurat({ limit: 9999, page: 1, kat: 'semua', sifat: 'semua' });
+      if (Array.isArray(result))            surats = result;
+      else if (Array.isArray(result?.data)) surats = result.data;
+    } catch(e) { /* ignore, fallback ke mock di bawah */ }
+
+    // Kalau dari API tidak dapat data, baca langsung dari localStorage (mock DB)
+    if (!surats || surats.length === 0) {
+      try {
+        const raw = localStorage.getItem('sicata_db');
+        surats = raw ? JSON.parse(raw) : [];
+      } catch(e) { surats = []; }
+    }
 
     if (!surats || surats.length === 0) {
       showToast('Tidak ada data surat untuk diekspor', 'error');
@@ -919,46 +943,87 @@ async function exportData(format) {
 }
 
 function exportCSV(surats, desa, tgl) {
-  // Header CSV
-  const headers = [
-    'No', 'Nomor Surat', 'Kategori', 'Jenis Surat',
-    'Tanggal', 'Dari/Kepada', 'Perihal', 'Sifat', 'Jabatan', 'Nama TTD'
-  ];
+  const masuk  = surats.filter(s => s.kat === 'masuk').length;
+  const keluar = surats.filter(s => s.kat === 'keluar').length;
 
   const rows = surats.map((s, i) => {
     const tanggal = s.tgl ? new Date(s.tgl).toLocaleDateString('id-ID') : '-';
     const kat     = s.kat === 'masuk' ? 'Surat Masuk' : 'Surat Keluar';
-    return [
-      i + 1,
-      s.nomor        || '-',
-      kat,
-      s.jenisLabel   || s.jenis || '-',
-      tanggal,
-      s.tujuan       || '-',
-      s.perihal      || '-',
-      s.sifat        || '-',
-      s.jabatan      || '-',
-      s.nama         || '-',
-    ].map(v => `"${String(v).replace(/"/g, '""')}"`).join(',');
-  });
+    const xe = v => String(v||'-').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    return `<tr>
+      <td style="text-align:center">${i+1}</td>
+      <td style="mso-number-format:'@'">${xe(s.nomor)}</td>
+      <td>${xe(kat)}</td>
+      <td>${xe(s.jenisLabel || s.jenis)}</td>
+      <td style="mso-number-format:'@'">${xe(tanggal)}</td>
+      <td>${xe(s.tujuan)}</td>
+      <td>${xe(s.perihal)}</td>
+      <td style="text-align:center">${xe(s.sifat)}</td>
+      <td>${xe(s.jabatan)}</td>
+      <td>${xe(s.nama)}</td>
+    </tr>`;
+  }).join('');
 
-  const csvContent = '\uFEFF' // BOM supaya Excel baca UTF-8 dengan benar
-    + `"REKAPITULASI SURAT - ${desa.toUpperCase()}"\n`
-    + `"Dicetak tanggal: ${tgl}"\n`
-    + `"Total: ${surats.length} surat"\n`
-    + '\n'
-    + headers.map(h => `"${h}"`).join(',') + '\n'
-    + rows.join('\n');
+  // Format XLS (HTML table) — Excel buka langsung tanpa perlu set default app
+  const xlsContent = `
+<html xmlns:o="urn:schemas-microsoft-com:office:office"
+      xmlns:x="urn:schemas-microsoft-com:office:excel"
+      xmlns="http://www.w3.org/TR/REC-html40">
+<head>
+  <meta charset="UTF-8">
+  <!--[if gte mso 9]>
+  <xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet>
+    <x:Name>Rekap Surat</x:Name>
+    <x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions>
+  </x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml>
+  <![endif]-->
+  <style>
+    body { font-family: Arial, sans-serif; font-size: 11pt; }
+    .judul  { font-size: 14pt; font-weight: bold; text-align: center; }
+    .sub    { font-size: 10pt; text-align: center; color: #555; }
+    .ringk  { font-size: 10pt; }
+    table   { border-collapse: collapse; width: 100%; margin-top: 10px; font-size: 10pt; }
+    th      { background-color: #1e3a6e; color: #ffffff; padding: 7px 8px; text-align: left; border: 1px solid #1e3a6e; }
+    td      { padding: 5px 8px; border: 1px solid #cccccc; vertical-align: top; }
+    tr:nth-child(even) td { background-color: #f5f7ff; }
+  </style>
+</head>
+<body>
+  <p class="judul">REKAPITULASI SURAT</p>
+  <p class="sub">Desa ${desa} &nbsp;|&nbsp; Dicetak: ${tgl}</p>
+  <p class="ringk">
+    Total: <b>${surats.length}</b> surat &nbsp;|&nbsp;
+    Masuk: <b>${masuk}</b> &nbsp;|&nbsp;
+    Keluar: <b>${keluar}</b>
+  </p>
+  <table>
+    <thead><tr>
+      <th style="width:30px">No</th>
+      <th>Nomor Surat</th>
+      <th>Kategori</th>
+      <th>Jenis Surat</th>
+      <th>Tanggal</th>
+      <th>Dari / Kepada</th>
+      <th>Perihal</th>
+      <th>Sifat</th>
+      <th>Jabatan</th>
+      <th>Nama TTD</th>
+    </tr></thead>
+    <tbody>${rows}</tbody>
+  </table>
+</body>
+</html>`;
 
-  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  // Ekstensi .xls supaya Windows/Mac langsung buka dengan Excel
+  const blob = new Blob(['\uFEFF' + xlsContent], { type: 'application/vnd.ms-excel;charset=utf-8;' });
   const url  = URL.createObjectURL(blob);
   const a    = document.createElement('a');
   a.href     = url;
-  a.download = `Rekap-Surat-${desa.replace(/\s+/g,'-')}-${new Date().toISOString().slice(0,10)}.csv`;
+  a.download = `Rekap-Surat-${desa.replace(/\s+/g,'-')}-${new Date().toISOString().slice(0,10)}.xls`;
   document.body.appendChild(a);
   a.click();
   setTimeout(() => { URL.revokeObjectURL(url); a.remove(); }, 500);
-  showToast(`✅ Rekap CSV berhasil didownload (${surats.length} surat)`, 'success');
+  showToast(`✅ Rekap Excel berhasil didownload (${surats.length} surat)`, 'success');
 }
 
 function exportPrintable(surats, desa, tgl) {
