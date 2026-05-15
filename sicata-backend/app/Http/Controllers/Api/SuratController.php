@@ -85,7 +85,8 @@ class SuratController extends Controller
     {
         $validated = $request->validate([
             'jenis'      => ['required', 'string', Rule::in([
-                'masuk_umum','masuk_dinas','masuk_permohonan',
+                'masuk_keterangan','masuk_undangan','masuk_permohonan',
+                'masuk_pengantar','masuk_keputusan','masuk_edaran',
             ])],
             'tgl'        => ['required', 'date'],
             'tujuan'     => ['required', 'string', 'max:255'],

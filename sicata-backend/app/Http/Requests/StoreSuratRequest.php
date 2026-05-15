@@ -19,7 +19,7 @@ class StoreSuratRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'jenis'   => ['required', 'string', 'in:keluar_keterangan,keluar_undangan,keluar_permohonan,keluar_pengantar,keluar_keputusan,keluar_edaran,masuk_umum,masuk_dinas,masuk_permohonan'],
+            'jenis'   => ['required', 'string', 'in:keluar_keterangan,keluar_undangan,keluar_permohonan,keluar_pengantar,keluar_keputusan,keluar_edaran,masuk_keterangan,masuk_undangan,masuk_permohonan,masuk_pengantar,masuk_keputusan,masuk_edaran'],
             'tgl'     => ['required', 'date'],
             'tujuan'  => ['required', 'string', 'max:255'],
             'perihal' => ['required', 'string', 'max:500'],

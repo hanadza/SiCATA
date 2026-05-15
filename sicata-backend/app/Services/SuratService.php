@@ -15,9 +15,15 @@ class SuratService
         'keluar_pengantar'  => ['kode' => 'SPG', 'label' => 'Surat Pengantar',         'kat' => 'keluar'],
         'keluar_keputusan'  => ['kode' => 'SKP', 'label' => 'Surat Keputusan',         'kat' => 'keluar'],
         'keluar_edaran'     => ['kode' => 'SE',  'label' => 'Surat Edaran',            'kat' => 'keluar'],
+        'masuk_keterangan'  => ['kode' => 'SK',  'label' => 'Surat Keterangan',        'kat' => 'masuk'],
+        'masuk_undangan'    => ['kode' => 'SU',  'label' => 'Surat Undangan',          'kat' => 'masuk'],
+        'masuk_permohonan'  => ['kode' => 'SP',  'label' => 'Surat Permohonan',        'kat' => 'masuk'],
+        'masuk_pengantar'   => ['kode' => 'SPG', 'label' => 'Surat Pengantar',         'kat' => 'masuk'],
+        'masuk_keputusan'   => ['kode' => 'SKP', 'label' => 'Surat Keputusan',         'kat' => 'masuk'],
+        'masuk_edaran'      => ['kode' => 'SE',  'label' => 'Surat Edaran',            'kat' => 'masuk'],
+        // Backward compat — old masuk types
         'masuk_umum'        => ['kode' => 'SM',  'label' => 'Surat Masuk Umum',        'kat' => 'masuk'],
         'masuk_dinas'       => ['kode' => 'SMD', 'label' => 'Surat Masuk Dinas',       'kat' => 'masuk'],
-        'masuk_permohonan'  => ['kode' => 'SMP', 'label' => 'Surat Masuk Permohonan', 'kat' => 'masuk'],
     ];
 
     private const ROMAWI = ['', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII'];

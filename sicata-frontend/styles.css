@@ -186,7 +186,7 @@ td{padding:11px 14px;font-size:12.5px;vertical-align:middle;}
 .btn-icon.danger:hover{border-color:var(--red);color:var(--red);background:rgba(239,68,68,.08);}
 .btn-icon.primary{background:var(--accent);border-color:var(--accent);color:#fff;}
 .btn-icon.primary:hover{background:#2563eb;}
-body.is-user .btn-icon.admin-action{display:none;}
+
 .empty-state{text-align:center;padding:48px 20px;color:var(--text-3);}
 .empty-icon{width:50px;height:50px;margin:0 auto 14px;background:var(--bg);border-radius:14px;display:flex;align-items:center;justify-content:center;color:var(--border-hover);}
 .empty-state p{font-size:13px;color:var(--text-2);}
