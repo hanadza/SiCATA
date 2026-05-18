@@ -71,9 +71,12 @@ const KODE_MAP = {
   keluar_pengantar: { kode: 'SPG', label: 'Surat Pengantar', kat: 'keluar' },
   keluar_keputusan: { kode: 'SKP', label: 'Surat Keputusan', kat: 'keluar' },
   keluar_edaran: { kode: 'SE', label: 'Surat Edaran', kat: 'keluar' },
-  masuk_umum: { kode: 'SM', label: 'Surat Masuk Umum', kat: 'masuk' },
-  masuk_dinas: { kode: 'SMD', label: 'Surat Masuk Dinas', kat: 'masuk' },
+  masuk_keterangan: { kode: 'SK',  label: 'Surat Masuk Keterangan', kat: 'masuk' },
+  masuk_undangan:   { kode: 'SU',  label: 'Surat Masuk Undangan',   kat: 'masuk' },
   masuk_permohonan: { kode: 'SMP', label: 'Surat Masuk Permohonan', kat: 'masuk' },
+  masuk_pengantar:  { kode: 'SPG', label: 'Surat Masuk Pengantar',  kat: 'masuk' },
+  masuk_keputusan:  { kode: 'SKP', label: 'Surat Masuk Keputusan',  kat: 'masuk' },
+  masuk_edaran:     { kode: 'SE',  label: 'Surat Masuk Edaran',     kat: 'masuk' },
 };
 
 function mockDelay(ms = 300) { return new Promise(r => setTimeout(r, ms)); }
@@ -97,9 +100,9 @@ function seedMockData() {
   const demos = [
     { jenis: 'keluar_keterangan', tujuan: 'Camat Kecamatan Sukamaju', perihal: 'Permohonan Dana BLT Desa 2025', sifat: 'Penting', tgl: '2025-11-15' },
     { jenis: 'keluar_undangan', tujuan: 'Seluruh Kepala Dusun', perihal: 'Undangan Rapat Koordinasi Pembangunan', sifat: 'Biasa', tgl: '2025-11-20' },
-    { jenis: 'masuk_dinas', tujuan: 'Dinas PMD Kabupaten', perihal: 'Jadwal Evaluasi Program DD 2025', sifat: 'Penting', tgl: '2025-11-18' },
+    { jenis: 'masuk_keterangan', tujuan: 'Dinas PMD Kabupaten', perihal: 'Jadwal Evaluasi Program DD 2025', sifat: 'Penting', tgl: '2025-11-18' },
     { jenis: 'keluar_edaran', tujuan: 'Warga Desa Sukamaju', perihal: 'Edaran Protokol Kesehatan RT/RW', sifat: 'Segera', tgl: '2025-12-01' },
-    { jenis: 'masuk_umum', tujuan: 'Bank BRI Cabang Sukamaju', perihal: 'Konfirmasi Pencairan Dana Desa', sifat: 'Rahasia', tgl: '2025-12-05' },
+    { jenis: 'masuk_undangan', tujuan: 'Bank BRI Cabang Sukamaju', perihal: 'Konfirmasi Pencairan Dana Desa', sifat: 'Rahasia', tgl: '2025-12-05' },
   ];
   const db = [], ctr = {};
   demos.forEach((d, i) => {
@@ -339,7 +342,7 @@ const API = {
       return data;
     }
     // Mock — simpan ke MOCK_DB tanpa file
-    const jenis = formData.get('jenis') || 'masuk_umum';
+    const jenis = formData.get('jenis') || 'masuk_keterangan';
     const tgl = formData.get('tgl') || new Date().toISOString().slice(0, 10);
     const { nomor, key, num, info } = mockGenerateNomor(jenis, tgl);
     const ctr = MOCK_DB.ctr;
